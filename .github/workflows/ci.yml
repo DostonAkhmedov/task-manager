@@ -86,7 +86,7 @@ jobs:
             ${{ runner.os }}-go-
       
       - name: Run unit tests
-        run: make test-cover
+        run: go test -v -short -coverprofile=coverage.out ./...
         env:
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
