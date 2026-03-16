@@ -115,7 +115,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root123
-          MYSQL_DATABASE: task_manager_test
+          MYSQL_DATABASE: task_manager
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
           --health-interval=10s
@@ -137,7 +137,7 @@ jobs:
       
       - name: Apply migrations
         run: |
-          mysql -h 127.0.0.1 -u root -proot123 task_manager_test < migrations/schema.sql
+          mysql -h 127.0.0.1 -u root -proot123 -e "source migrations/schema.sql"
           if [ $? -ne 0 ]; then
             echo "Migration failed!"
             exit 1
@@ -145,8 +145,15 @@ jobs:
       
       - name: Verify migrations
         run: |
-          mysql -h 127.0.0.1 -u root -proot123 task_manager_test -e "SHOW TABLES;" | grep -E "users|teams|tasks|task_history" || exit 1
-          echo "All expected tables found!"
+          echo "Checking tables in task_manager database..."
+          TABLES=$(mysql -h 127.0.0.1 -u root -proot123 task_manager -e "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='task_manager'" 2>/dev/null | tr '\n' ' ')
+          echo "Found tables: $TABLES"
+          if [[ $TABLES == *"users"* ]] && [[ $TABLES == *"teams"* ]] && [[ $TABLES == *"tasks"* ]]; then
+            echo "✓ All expected tables found!"
+          else
+            echo "✗ Required tables missing!"
+            exit 1
+          fi
 
   # Job 4: Build
   build:
