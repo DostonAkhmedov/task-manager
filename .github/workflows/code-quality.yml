@@ -11,6 +11,9 @@ jobs:
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     
     steps:
       - name: Checkout code
@@ -31,14 +34,17 @@ jobs:
       
       - name: Upload gosec results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         with:
           sarif_file: gosec-results.sarif
+          wait-for-processing: true
 
   # Dependency Check
   dependencies:
     name: Check Dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -62,6 +68,8 @@ jobs:
   coverage:
     name: Coverage Quality Gate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     services:
       mysql:
