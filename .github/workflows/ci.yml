@@ -24,8 +24,8 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: latest
-          args: --timeout=5m --no-config
+          version: v1.65.0
+          args: --timeout=5m --no-config --out-format=colored-line-number
 
   # Job 2: Run Unit Tests
   unit-tests:
